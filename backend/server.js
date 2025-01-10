@@ -3,11 +3,17 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
 
+const aiRoutes = require('./routes/aiRoutes');
+const newsRoutes = require('./routes/news');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000', // Replace with your frontend URL
+  credentials: true,
+}));
 app.use(express.json());
 
 // MongoDB Connection
@@ -20,7 +26,7 @@ app.get('/', (req, res) => {
     res.send('Backend is running');
 });
 
-const newsRoutes = require('./routes/news');
+app.use('/api/ai', aiRoutes);
 app.use('/api/news', newsRoutes);
 
 // Start Server

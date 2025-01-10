@@ -1,125 +1,98 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import './Categories.css';
 
 function Categories() {
-  const [activeCategory, setActiveCategory] = useState('Technology');
+  const [activeCategory, setActiveCategory] = useState('technology'); // Default category
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const categories = [
-    {
-      name: 'Technology',
-      description: 'Latest tech news and innovations',
-      image: '/placeholder.svg?height=200&width=300',
-      articles: [
-        {
-          title: 'Apple unveils new iPhone features',
-          description: 'The latest iOS update brings exciting features...',
-          date: 'Jan 5, 2024'
-        },
-        {
-          title: 'AI breakthrough in healthcare',
-          description: 'New AI model helps detect diseases earlier...',
-          date: 'Jan 4, 2024'
-        },
-        {
-          title: 'SpaceX launches new satellite',
-          description: 'Successfully deployed communication satellites...',
-          date: 'Jan 3, 2024'
-        }
-      ]
-    },
-    {
-      name: 'Sports',
-      description: 'Sports updates and highlights',
-      image: '/placeholder.svg?height=200&width=300',
-      articles: [
-        {
-          title: 'World Cup Final Results',
-          description: 'Exciting match ends in dramatic fashion...',
-          date: 'Jan 5, 2024'
-        },
-        {
-          title: 'NBA Trade Updates',
-          description: 'Major trades shake up the league...',
-          date: 'Jan 4, 2024'
-        },
-        {
-          title: 'Tennis Championship',
-          description: 'Rising star wins first major title...',
-          date: 'Jan 3, 2024'
-        }
-      ]
-    },
-    {
-      name: 'Business',
-      description: 'Business and finance updates',
-      image: '/placeholder.svg?height=200&width=300',
-      articles: [
-        {
-          title: 'Stock Market Rally',
-          description: 'Markets reach new all-time highs...',
-          date: 'Jan 5, 2024'
-        },
-        {
-          title: 'Startup Success Story',
-          description: 'Local startup receives major funding...',
-          date: 'Jan 4, 2024'
-        },
-        {
-          title: 'Economic Forecast',
-          description: 'Experts predict strong growth...',
-          date: 'Jan 3, 2024'
-        }
-      ]
-    }
+    { name: 'Technology', value: 'technology' },
+    { name: 'Sports', value: 'sports' },
+    { name: 'Business', value: 'business' },
+    { name: 'Health', value: 'health' },
+    { name: 'Entertainment', value: 'entertainment' },
   ];
 
-  const activeData = categories.find(cat => cat.name === activeCategory);
+  // Fetch news articles based on the active category
+  useEffect(() => {
+    const fetchNews = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get('https://newsapi.org/v2/top-headlines', {
+          params: {
+            category: activeCategory,
+            country: 'us',
+            apiKey: 'e58f037beb964b9485672082d46591ac', // Replace with your NewsAPI key
+          },
+        });
+        setArticles(response.data.articles);
+      } catch (error) {
+        console.error('Error fetching news:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNews();
+  }, [activeCategory]);
 
   return (
     <div className="categories-container">
+      {/* Banner Section */}
       <div className="categories-banner">
         <h1>📰 News Categories</h1>
         <p>Stay informed with the latest updates across different topics</p>
       </div>
 
+      {/* Category Tabs */}
       <div className="category-tabs">
         {categories.map((category) => (
           <button
-            key={category.name}
-            className={`category-tab ${activeCategory === category.name ? 'active' : ''}`}
-            onClick={() => setActiveCategory(category.name)}
+            key={category.value}
+            className={`category-tab ${activeCategory === category.value ? 'active' : ''}`}
+            onClick={() => setActiveCategory(category.value)}
           >
             {category.name}
           </button>
         ))}
       </div>
 
+      {/* Category Content */}
       <div className="category-content">
-        <div className="category-header">
-          <img src={activeData.image} alt={activeData.name} />
-          <div className="category-info">
-            <h2>{activeData.name}</h2>
-            <p>{activeData.description}</p>
-          </div>
-        </div>
-
-        <div className="articles-grid">
-          {activeData.articles.map((article, index) => (
-            <div key={index} className="article-card">
-              <img src="/placeholder.svg?height=200&width=300" alt={article.title} />
-              <div className="article-content">
-                <h3>{article.title}</h3>
-                <p>{article.description}</p>
-                <span className="article-date">{article.date}</span>
-                <button className="read-more">Read More</button>
+        {loading ? (
+          <div className="loading-spinner">Loading...</div>
+        ) : (
+          <div className="articles-grid">
+            {articles.map((article, index) => (
+              <div key={index} className="article-card">
+                <img
+                  src={article.urlToImage || '/placeholder.svg?height=200&width=300'}
+                  alt={article.title}
+                />
+                <div className="article-content">
+                  <h3>{article.title}</h3>
+                  <p>{article.description || 'No description available.'}</p>
+                  <span className="article-date">
+                    {new Date(article.publishedAt).toLocaleDateString()}
+                  </span>
+                  <a
+                    href={article.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="read-more"
+                  >
+                    Read More
+                  </a>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
 export default Categories;
-

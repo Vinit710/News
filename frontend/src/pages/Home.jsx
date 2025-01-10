@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import './Home.css'; // Import the CSS file for styling
 
 function Home() {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isChatOpen, setIsChatOpen] = useState(false); // State to manage chat visibility
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -27,6 +29,7 @@ function Home() {
 
   return (
     <div className="home">
+      {/* Hero Section */}
       <header className="hero">
         <div className="container">
           <h1>Stay Informed with NewsHub</h1>
@@ -34,6 +37,7 @@ function Home() {
         </div>
       </header>
 
+      {/* Trending News Section */}
       <section className="trending-news">
         <div className="container">
           <h2>Today's Headlines</h2>
@@ -57,8 +61,73 @@ function Home() {
           )}
         </div>
       </section>
+
+      {/* Chatbot Overlay */}
+      <div className={`chatbot-overlay ${isChatOpen ? 'open' : ''}`}>
+        <div className="chatbot-header">
+          <h3>NewsBot</h3>
+          <button onClick={() => setIsChatOpen(!isChatOpen)}>
+            {isChatOpen ? '×' : 'Chat'}
+          </button>
+        </div>
+        {isChatOpen && (
+          <div className="chatbot-window">
+            <Chatbot />
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <footer className="footer">
+        <div className="container">
+          <p>&copy; 2023 NewsHub. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }
 
 export default Home;
+
+// Chatbot Component
+function Chatbot() {
+  const [input, setInput] = useState('');
+  const [response, setResponse] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSend = async () => {
+    if (!input.trim()) {
+      setResponse("Error: Prompt is required");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await axios.post('/api/ai', { prompt: input });
+      setResponse(res.data.response);
+    } catch (error) {
+      console.error("Error:", error);
+      setResponse(error.response?.data?.error || "An error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="chatbot">
+      <div className="chatbot-messages">
+        {response && <div className="message response">{response}</div>}
+      </div>
+      <div className="chatbot-input">
+        <textarea
+          placeholder="Ask about the news..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+        />
+        <button onClick={handleSend} disabled={loading}>
+          {loading ? "Loading..." : "Send"}
+        </button>
+      </div>
+    </div>
+  );
+}

@@ -9,6 +9,11 @@ import Categories from './pages/Categories';
 import About from './pages/About';
 import './App.css';
 
+
+
+
+
+
 function App() {
   return (
     <div className="app">
@@ -19,6 +24,7 @@ function App() {
         <Route path="/categories" element={<Categories />} />
         <Route path="/about" element={<About />} />
       </Routes>
+      
       <Footer />
     </div>
   );
