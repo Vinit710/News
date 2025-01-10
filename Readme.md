@@ -43,7 +43,7 @@ A modern news aggregation platform built with **React.js**, offering real-time n
 ---
 
 ## 📂 **Project Structure**
-```
+
 news-app/
 │
 ├── backend/       # Express & MongoDB Backend
@@ -66,7 +66,7 @@ news-app/
 │
 ├── .gitignore
 └── README.md
-```
+
 
 ---
 
